@@ -1,0 +1,39 @@
+# Xcode
+DerivedData/
+build/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Archives and signing
+*.xcarchive
+*.ipa
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.p12
+*.pem
+*.key
+
+# Local secrets and environment
+.env
+.env.*
+*.local
+Config.local.*
+Secrets.*
+*.xcconfig.local
+
+# macOS
+.DS_Store
+
+# Logs and reports
+*.log
+*.xcresult
+
+# Swift Package Manager
+.build/
+Packages/
+
+# App generated data
+UserDefaults.plist

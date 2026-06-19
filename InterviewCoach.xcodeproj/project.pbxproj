@@ -1,0 +1,624 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0000000000000000000001 /* InterviewCoachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000101 /* InterviewCoachApp.swift */; };
+		AA0000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000102 /* ContentView.swift */; };
+		AA0000000000000000000003 /* InterviewQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000103 /* InterviewQuestion.swift */; };
+		AA0000000000000000000004 /* ResumeProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000104 /* ResumeProfile.swift */; };
+		AA0000000000000000000005 /* AnswerEvaluation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000105 /* AnswerEvaluation.swift */; };
+		AA0000000000000000000006 /* ResumeAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000106 /* ResumeAnalyzer.swift */; };
+		AA0000000000000000000007 /* BuiltInQuestionBank.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000107 /* BuiltInQuestionBank.swift */; };
+		AA0000000000000000000008 /* QuestionMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000108 /* QuestionMatcher.swift */; };
+		AA0000000000000000000009 /* ResumeTextExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000109 /* ResumeTextExtractor.swift */; };
+		AA000000000000000000000A /* InterviewAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010A /* InterviewAIService.swift */; };
+		AA000000000000000000000B /* DeepSeekClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010B /* DeepSeekClient.swift */; };
+		AA000000000000000000000C /* SpeechRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010C /* SpeechRecognitionService.swift */; };
+		AA000000000000000000000D /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010D /* AppViewModel.swift */; };
+		AA000000000000000000000E /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010E /* Components.swift */; };
+		AA000000000000000000000F /* ResumeSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000010F /* ResumeSummaryView.swift */; };
+		AA0000000000000000000010 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000110 /* HomeView.swift */; };
+		AA0000000000000000000011 /* QuestionBankView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000111 /* QuestionBankView.swift */; };
+		AA0000000000000000000012 /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000112 /* PracticeView.swift */; };
+		AA0000000000000000000013 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000113 /* ReviewView.swift */; };
+		AA0000000000000000000014 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000114 /* SettingsView.swift */; };
+		AA0000000000000000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000115 /* Assets.xcassets */; };
+		AA0000000000000000000016 /* ResumeAnalyzerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000116 /* ResumeAnalyzerTests.swift */; };
+		AA0000000000000000000017 /* QuestionMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000117 /* QuestionMatcherTests.swift */; };
+		AA0000000000000000000018 /* AIServiceFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000119 /* AIServiceFactory.swift */; };
+		AA0000000000000000000019 /* DeepSeekClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000011A /* DeepSeekClientTests.swift */; };
+		AA000000000000000000001A /* SecureAPIKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000011B /* SecureAPIKeyStore.swift */; };
+		AA000000000000000000001B /* DeepSeekConnectionTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000011C /* DeepSeekConnectionTester.swift */; };
+		AA000000000000000000001C /* DeepSeekSettingsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000011D /* DeepSeekSettingsPanel.swift */; };
+		AA000000000000000000001E /* ReviewStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000000000000000000011F /* ReviewStore.swift */; };
+		AA000000000000000000001F /* questions.json in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000120 /* questions.json */; };
+		AA0000000000000000000020 /* resume_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000121 /* resume_profile.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA0000000000000000000201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000301 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000401;
+			remoteInfo = InterviewCoach;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AA0000000000000000000101 /* InterviewCoachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewCoachApp.swift; sourceTree = "<group>"; };
+		AA0000000000000000000102 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000103 /* InterviewQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewQuestion.swift; sourceTree = "<group>"; };
+		AA0000000000000000000104 /* ResumeProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeProfile.swift; sourceTree = "<group>"; };
+		AA0000000000000000000105 /* AnswerEvaluation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnswerEvaluation.swift; sourceTree = "<group>"; };
+		AA0000000000000000000106 /* ResumeAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeAnalyzer.swift; sourceTree = "<group>"; };
+		AA0000000000000000000107 /* BuiltInQuestionBank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuiltInQuestionBank.swift; sourceTree = "<group>"; };
+		AA0000000000000000000108 /* QuestionMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionMatcher.swift; sourceTree = "<group>"; };
+		AA0000000000000000000109 /* ResumeTextExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeTextExtractor.swift; sourceTree = "<group>"; };
+		AA000000000000000000010A /* InterviewAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterviewAIService.swift; sourceTree = "<group>"; };
+		AA000000000000000000010B /* DeepSeekClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekClient.swift; sourceTree = "<group>"; };
+		AA000000000000000000010C /* SpeechRecognitionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognitionService.swift; sourceTree = "<group>"; };
+		AA000000000000000000010D /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		AA000000000000000000010E /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		AA000000000000000000010F /* ResumeSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeSummaryView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000110 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000111 /* QuestionBankView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionBankView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000112 /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000113 /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000114 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		AA0000000000000000000115 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA0000000000000000000116 /* ResumeAnalyzerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumeAnalyzerTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000117 /* QuestionMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionMatcherTests.swift; sourceTree = "<group>"; };
+		AA0000000000000000000118 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA0000000000000000000119 /* AIServiceFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIServiceFactory.swift; sourceTree = "<group>"; };
+		AA000000000000000000011A /* DeepSeekClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekClientTests.swift; sourceTree = "<group>"; };
+		AA000000000000000000011B /* SecureAPIKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureAPIKeyStore.swift; sourceTree = "<group>"; };
+		AA000000000000000000011C /* DeepSeekConnectionTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekConnectionTester.swift; sourceTree = "<group>"; };
+		AA000000000000000000011D /* DeepSeekSettingsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepSeekSettingsPanel.swift; sourceTree = "<group>"; };
+		AA000000000000000000011F /* ReviewStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStore.swift; sourceTree = "<group>"; };
+		AA0000000000000000000120 /* questions.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = questions.json; sourceTree = "<group>"; };
+		AA0000000000000000000121 /* resume_profile.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = resume_profile.json; sourceTree = "<group>"; };
+		AA0000000000000000000501 /* InterviewCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InterviewCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000502 /* InterviewCoachTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InterviewCoachTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA0000000000000000000601 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000602 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA0000000000000000000701 = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000702 /* InterviewCoach */,
+				AA0000000000000000000708 /* InterviewCoachTests */,
+				AA0000000000000000000709 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000702 /* InterviewCoach */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000101 /* InterviewCoachApp.swift */,
+				AA0000000000000000000102 /* ContentView.swift */,
+				AA0000000000000000000703 /* Models */,
+				AA0000000000000000000704 /* Services */,
+				AA0000000000000000000705 /* ViewModels */,
+				AA0000000000000000000706 /* Views */,
+				AA0000000000000000000707 /* Resources */,
+				AA0000000000000000000118 /* Info.plist */,
+			);
+			path = InterviewCoach;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000703 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000103 /* InterviewQuestion.swift */,
+				AA0000000000000000000104 /* ResumeProfile.swift */,
+				AA0000000000000000000105 /* AnswerEvaluation.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000704 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000106 /* ResumeAnalyzer.swift */,
+				AA0000000000000000000107 /* BuiltInQuestionBank.swift */,
+				AA0000000000000000000108 /* QuestionMatcher.swift */,
+				AA0000000000000000000109 /* ResumeTextExtractor.swift */,
+				AA000000000000000000010A /* InterviewAIService.swift */,
+				AA000000000000000000010B /* DeepSeekClient.swift */,
+				AA0000000000000000000119 /* AIServiceFactory.swift */,
+				AA000000000000000000011B /* SecureAPIKeyStore.swift */,
+				AA000000000000000000011C /* DeepSeekConnectionTester.swift */,
+				AA000000000000000000010C /* SpeechRecognitionService.swift */,
+				AA000000000000000000011F /* ReviewStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000705 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				AA000000000000000000010D /* AppViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000706 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000000000000000000010E /* Components.swift */,
+				AA000000000000000000010F /* ResumeSummaryView.swift */,
+				AA0000000000000000000110 /* HomeView.swift */,
+				AA0000000000000000000111 /* QuestionBankView.swift */,
+				AA0000000000000000000112 /* PracticeView.swift */,
+				AA0000000000000000000113 /* ReviewView.swift */,
+				AA0000000000000000000114 /* SettingsView.swift */,
+				AA000000000000000000011D /* DeepSeekSettingsPanel.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000707 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000115 /* Assets.xcassets */,
+				AA0000000000000000000120 /* questions.json */,
+				AA0000000000000000000121 /* resume_profile.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000708 /* InterviewCoachTests */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000116 /* ResumeAnalyzerTests.swift */,
+				AA0000000000000000000117 /* QuestionMatcherTests.swift */,
+				AA000000000000000000011A /* DeepSeekClientTests.swift */,
+			);
+			path = InterviewCoachTests;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000709 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA0000000000000000000501 /* InterviewCoach.app */,
+				AA0000000000000000000502 /* InterviewCoachTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA0000000000000000000401 /* InterviewCoach */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000801 /* Build configuration list for PBXNativeTarget "InterviewCoach" */;
+			buildPhases = (
+				AA0000000000000000000901 /* Sources */,
+				AA0000000000000000000601 /* Frameworks */,
+				AA0000000000000000000902 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = InterviewCoach;
+			productName = InterviewCoach;
+			productReference = AA0000000000000000000501 /* InterviewCoach.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AA0000000000000000000402 /* InterviewCoachTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000802 /* Build configuration list for PBXNativeTarget "InterviewCoachTests" */;
+			buildPhases = (
+				AA0000000000000000000903 /* Sources */,
+				AA0000000000000000000602 /* Frameworks */,
+				AA0000000000000000000904 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AA0000000000000000000202 /* PBXTargetDependency */,
+			);
+			name = InterviewCoachTests;
+			productName = InterviewCoachTests;
+			productReference = AA0000000000000000000502 /* InterviewCoachTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA0000000000000000000301 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					AA0000000000000000000401 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					AA0000000000000000000402 = {
+						CreatedOnToolsVersion = 26.5;
+						TestTargetID = AA0000000000000000000401;
+					};
+				};
+			};
+			buildConfigurationList = AA0000000000000000000803 /* Build configuration list for PBXProject "InterviewCoach" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA0000000000000000000701;
+			productRefGroup = AA0000000000000000000709 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA0000000000000000000401 /* InterviewCoach */,
+				AA0000000000000000000402 /* InterviewCoachTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA0000000000000000000902 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000015 /* Assets.xcassets in Resources */,
+				AA000000000000000000001F /* questions.json in Resources */,
+				AA0000000000000000000020 /* resume_profile.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000904 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000000000000000000901 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000001 /* InterviewCoachApp.swift in Sources */,
+				AA0000000000000000000002 /* ContentView.swift in Sources */,
+				AA0000000000000000000003 /* InterviewQuestion.swift in Sources */,
+				AA0000000000000000000004 /* ResumeProfile.swift in Sources */,
+				AA0000000000000000000005 /* AnswerEvaluation.swift in Sources */,
+				AA0000000000000000000006 /* ResumeAnalyzer.swift in Sources */,
+				AA0000000000000000000007 /* BuiltInQuestionBank.swift in Sources */,
+				AA0000000000000000000008 /* QuestionMatcher.swift in Sources */,
+				AA0000000000000000000009 /* ResumeTextExtractor.swift in Sources */,
+				AA000000000000000000000A /* InterviewAIService.swift in Sources */,
+				AA000000000000000000000B /* DeepSeekClient.swift in Sources */,
+				AA000000000000000000000C /* SpeechRecognitionService.swift in Sources */,
+				AA000000000000000000000D /* AppViewModel.swift in Sources */,
+				AA000000000000000000000E /* Components.swift in Sources */,
+				AA000000000000000000000F /* ResumeSummaryView.swift in Sources */,
+				AA0000000000000000000010 /* HomeView.swift in Sources */,
+				AA0000000000000000000011 /* QuestionBankView.swift in Sources */,
+				AA0000000000000000000012 /* PracticeView.swift in Sources */,
+				AA0000000000000000000013 /* ReviewView.swift in Sources */,
+				AA0000000000000000000014 /* SettingsView.swift in Sources */,
+				AA0000000000000000000018 /* AIServiceFactory.swift in Sources */,
+				AA000000000000000000001A /* SecureAPIKeyStore.swift in Sources */,
+				AA000000000000000000001B /* DeepSeekConnectionTester.swift in Sources */,
+				AA000000000000000000001C /* DeepSeekSettingsPanel.swift in Sources */,
+				AA000000000000000000001E /* ReviewStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA0000000000000000000903 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000000000000000000016 /* ResumeAnalyzerTests.swift in Sources */,
+				AA0000000000000000000017 /* QuestionMatcherTests.swift in Sources */,
+				AA0000000000000000000019 /* DeepSeekClientTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AA0000000000000000000202 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000401 /* InterviewCoach */;
+			targetProxy = AA0000000000000000000201 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000000000000000000A01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000A02 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA0000000000000000000A03 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = InterviewCoach/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "备面Pro";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.interviewcoach;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0000000000000000000A04 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = InterviewCoach/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "备面Pro";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.interviewcoach;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		AA0000000000000000000A05 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.interviewcoach.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InterviewCoach.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InterviewCoach";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000A06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.interviewcoach.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/InterviewCoach.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/InterviewCoach";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0000000000000000000801 /* Build configuration list for PBXNativeTarget "InterviewCoach" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000A03 /* Debug */,
+				AA0000000000000000000A04 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000802 /* Build configuration list for PBXNativeTarget "InterviewCoachTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000A05 /* Debug */,
+				AA0000000000000000000A06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000803 /* Build configuration list for PBXProject "InterviewCoach" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000A01 /* Debug */,
+				AA0000000000000000000A02 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA0000000000000000000301 /* Project object */;
+}

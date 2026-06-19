@@ -1,0 +1,33 @@
+{
+  "role": "运维工程师 / 实施工程师 / 技术方案负责人",
+  "headline": "匿名样例画像：具备企业 IT 运维、容器平台、CI/CD、监控告警和项目交付经验。",
+  "management": "可按需填写团队管理、跨部门协同、SOP 建设、巡检机制和故障复盘经验。",
+  "stacks": [
+    "Linux",
+    "Shell",
+    "Nginx",
+    "MySQL",
+    "Redis",
+    "Jenkins",
+    "CI/CD",
+    "Docker",
+    "Kubernetes",
+    "Harbor",
+    "Helm",
+    "Prometheus",
+    "Grafana",
+    "ELK",
+    "Ansible",
+    "Terraform",
+    "Ceph",
+    "PostgreSQL",
+    "RabbitMQ",
+    "Kafka"
+  ],
+  "projectSignals": [
+    "容器平台建设：完成集群部署、镜像仓库接入、发布流程标准化和监控告警配置。",
+    "CI/CD 流水线治理：统一构建、测试、制品管理、灰度发布和回滚策略。",
+    "数据库与中间件运维：覆盖备份恢复、性能排查、容量规划和高可用演练。",
+    "交付项目复盘：沉淀部署手册、验收清单、风险清单和故障应急预案。"
+  ]
+}
