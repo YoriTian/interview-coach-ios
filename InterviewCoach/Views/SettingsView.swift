@@ -19,6 +19,7 @@ struct SettingsView: View {
                             Text("产品能力")
                                 .font(.system(size: 22, weight: .semibold))
                             CapabilityRow(icon: "doc.text.magnifyingglass", title: "简历解析", subtitle: "识别岗位、技能、项目关键词")
+                            CapabilityRow(icon: "scope", title: "JD 专项出题", subtitle: "粘贴岗位描述，由 DeepSeek 生成针对性问题")
                             CapabilityRow(icon: "square.stack.3d.up", title: "\(viewModel.questionBank.questions.count) 题库", subtitle: "涵盖简历追问、技术专项、项目复盘、方案投标")
                             CapabilityRow(icon: "mic", title: "语音练习", subtitle: "中文语音转写 + 表达指标分析")
                             CapabilityRow(icon: "sparkles", title: "DeepSeek 评分", subtitle: "6 维评估 + 改进建议 + 优化回答")
@@ -32,7 +33,10 @@ struct SettingsView: View {
                     }
 
                     if let profile = viewModel.resumeProfile {
-                        ResumeSummaryView(profile: profile)
+                        ResumeSummaryView(
+                            profile: profile,
+                            generatedQuestionCount: viewModel.questionBank.aiTechGeneratedCount
+                        )
                     }
 
                     SurfacePanel {
@@ -51,6 +55,20 @@ struct SettingsView: View {
                                 Spacer()
                             }
 
+                            if viewModel.questionBank.aiGeneratedCount > 0 {
+                                Button(role: .destructive) {
+                                    viewModel.clearAIGeneratedQuestions()
+                                } label: {
+                                    Label(
+                                        "清除 \(viewModel.questionBank.aiGeneratedCount) 道 AI 生成题",
+                                        systemImage: "sparkles"
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 44)
+                                }
+                                .buttonStyle(.bordered)
+                            }
+
                             Button(role: .destructive) {
                                 showResetConfirmation = true
                             } label: {
@@ -66,7 +84,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("备面Pro")
                                 .font(.system(size: 17, weight: .semibold))
-                            Text("版本 1.0.0 · 面试特训系统")
+                            Text("版本 1.2.0 · 面试特训系统")
                                 .font(.system(size: 14))
                                 .foregroundStyle(.secondary)
                         }

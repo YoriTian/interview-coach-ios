@@ -8,14 +8,16 @@ This repository is privacy-sanitized. It does not include personal resumes, real
 
 - Resume parsing from PDF or text
 - Technical stack extraction for topics such as Jenkins, CI/CD, Docker, Kubernetes, Harbor, Helm, Linux, Prometheus, and Grafana
-- JD-based training: paste a job description and generate targeted practice
+- DeepSeek JD question generation: paste a job description, extract requirements and gaps, then generate a replaceable targeted question set
 - Multiple practice modes: resume follow-up, JD training, technical drills, project review, delivery scenarios, product manager, implementation engineer, wrong questions, daily drill, review plan, and flashcards
 - Speech input with Mandarin speech recognition
-- DeepSeek-compatible AI scoring and coaching
+- DeepSeek V4 Pro deep-thinking mode for AI scoring and coaching
+- AI-generated technical interview questions based only on extracted resume tech stacks
+- Separate local persistence and counts for AI tech-stack questions and AI JD questions
 - Target-answer generation, answer framework, key phrases, and recitation scoring
 - Mock interview session reports with weak-point summary and next actions
 - Spaced repetition and wrong-question tracking
-- Local-first storage with Keychain for API keys and UserDefaults for learning progress
+- Local-first storage with Keychain for API keys and UserDefaults for learning progress, resume profiles, and generated questions
 
 ## Privacy And Secrets
 
@@ -38,7 +40,7 @@ This repository is privacy-sanitized. It does not include personal resumes, real
 3. Set your own Apple Development Team.
 4. Change the bundle identifier from `com.example.interviewcoach` to one you control if you want to run on a real device.
 5. Build and run.
-6. In the app settings, enter your own DeepSeek API key if you want AI scoring and coaching.
+6. In the app settings, enter your own DeepSeek API key if you want AI question generation, scoring, and coaching.
 
 Simulator build without signing:
 

@@ -23,11 +23,100 @@ final class DeepSeekClientTests: XCTestCase {
         XCTAssertEqual(json["max_tokens"] as? Int, 600)
         XCTAssertEqual((json["response_format"] as? [String: Any])?["type"] as? String, "json_object")
         XCTAssertEqual((json["thinking"] as? [String: Any])?["type"] as? String, "disabled")
+        XCTAssertNil(json["reasoning_effort"])
+        XCTAssertEqual(request.timeoutInterval, 60)
 
         let messages = try XCTUnwrap(json["messages"] as? [[String: Any]])
         let prompt = messages.compactMap { $0["content"] as? String }.joined(separator: "\n")
         XCTAssertTrue(prompt.contains("JSON"))
         XCTAssertTrue(prompt.contains(question.prompt))
+    }
+
+    func testBuildsDeepThinkingRequestForProModel() throws {
+        let request = try DeepSeekClient.makeChatCompletionRequest(
+            apiKey: "test-key",
+            model: DeepSeekModel.pro.rawValue,
+            system: "只输出 JSON。",
+            user: "生成技术面试题。",
+            maxTokens: 2_000
+        )
+
+        let body = try XCTUnwrap(request.httpBody)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+        XCTAssertEqual(json["model"] as? String, "deepseek-v4-pro")
+        XCTAssertEqual((json["thinking"] as? [String: Any])?["type"] as? String, "enabled")
+        XCTAssertEqual(json["reasoning_effort"] as? String, "high")
+        XCTAssertEqual(request.timeoutInterval, 120)
+    }
+
+    func testDecodesGeneratedTechnicalQuestions() throws {
+        let content = """
+        {
+          "questions": [
+            {
+              "stack": "Kubernetes",
+              "category": "案例分析",
+              "difficulty": "高级",
+              "prompt": "Pod 持续 CrashLoopBackOff 时，你会按什么顺序定位并恢复服务？",
+              "keywords": ["kubectl describe", "logs", "探针", "资源限制"],
+              "idealPoints": ["先确认影响范围", "查看事件和退出码", "检查探针与资源限制"],
+              "sampleAnswer": "先确认影响范围，再查看事件、日志和退出码，完成止血后验证并复盘。",
+              "followUps": ["如果没有日志怎么办？"],
+              "timeLimitSeconds": 240
+            }
+          ]
+        }
+        """
+
+        let questions = try DeepSeekClient.decodeGeneratedQuestionsJSON(
+            content,
+            role: .operations,
+            fallbackDifficulty: .mid
+        )
+
+        let question = try XCTUnwrap(questions.first)
+        XCTAssertTrue(question.id.hasPrefix("ai-tech-"))
+        XCTAssertEqual(question.role, .operations)
+        XCTAssertEqual(question.mode, PracticeMode.tech.rawValue)
+        XCTAssertEqual(question.category, .caseStudy)
+        XCTAssertEqual(question.difficulty, .senior)
+        XCTAssertEqual(question.keywords.first, "Kubernetes")
+        XCTAssertEqual(question.timeLimitSeconds, 240)
+    }
+
+    func testDecodesGeneratedJobDescriptionQuestions() throws {
+        let content = """
+        {
+          "questions": [
+            {
+              "stack": "CI/CD",
+              "category": "方案设计",
+              "difficulty": "中级",
+              "prompt": "请设计一条支持灰度发布、质量门禁和一键回滚的 CI/CD 流水线，并说明失败时如何止损。",
+              "keywords": ["质量门禁", "灰度发布", "回滚"],
+              "idealPoints": ["分阶段流水线", "制品不可变", "回滚触发条件"],
+              "sampleAnswer": "先定义流水线阶段和质量门禁，再说明灰度指标、回滚条件与审计机制。",
+              "followUps": ["数据库变更如何回滚？"],
+              "timeLimitSeconds": 300
+            }
+          ]
+        }
+        """
+
+        let questions = try DeepSeekClient.decodeGeneratedJobQuestionsJSON(
+            content,
+            role: .operations,
+            fallbackDifficulty: .mid
+        )
+
+        let question = try XCTUnwrap(questions.first)
+        XCTAssertTrue(question.id.hasPrefix("ai-jd-"))
+        XCTAssertEqual(question.role, .operations)
+        XCTAssertEqual(question.mode, PracticeMode.jobTarget.rawValue)
+        XCTAssertEqual(question.category, .systemDesign)
+        XCTAssertEqual(question.difficulty, .mid)
+        XCTAssertEqual(question.keywords.first, "CI/CD")
+        XCTAssertEqual(question.timeLimitSeconds, 300)
     }
 
     func testDecodesSuccessfulChatCompletionPayload() throws {

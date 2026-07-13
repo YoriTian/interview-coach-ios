@@ -3,10 +3,18 @@ import Foundation
 @MainActor
 final class QuestionBank: ObservableObject {
     @Published private(set) var questions: [InterviewQuestion]
+    private var bundledQuestions: [InterviewQuestion]
+    private var generatedQuestions: [InterviewQuestion]
     private var hasLoadedBundledQuestions = false
+    private static let generatedQuestionsKey = "InterviewCoach.generatedQuestions.v1"
 
-    init(questions: [InterviewQuestion] = QuestionBankLoader.fallbackQuestions) {
-        self.questions = questions
+    init(
+        questions: [InterviewQuestion] = QuestionBankLoader.fallbackQuestions,
+        loadsPersistedGeneratedQuestions: Bool = false
+    ) {
+        bundledQuestions = questions
+        generatedQuestions = loadsPersistedGeneratedQuestions ? Self.loadGeneratedQuestions() : []
+        self.questions = Self.merged(bundled: questions, generated: generatedQuestions)
     }
 
     func loadBundledQuestionsIfNeeded() async {
@@ -17,7 +25,42 @@ final class QuestionBank: ObservableObject {
               !bundledQuestions.isEmpty else {
             return
         }
-        questions = bundledQuestions
+        self.bundledQuestions = bundledQuestions
+        rebuildQuestions()
+    }
+
+    var aiGeneratedCount: Int { generatedQuestions.count }
+    var aiTechGeneratedCount: Int {
+        generatedQuestions.filter { $0.mode == PracticeMode.tech.rawValue }.count
+    }
+    var aiJobGeneratedCount: Int {
+        generatedQuestions.filter { $0.mode == PracticeMode.jobTarget.rawValue }.count
+    }
+
+    func upsertGeneratedQuestions(_ newQuestions: [InterviewQuestion]) {
+        guard !newQuestions.isEmpty else { return }
+        var promptIndex: [String: InterviewQuestion] = [:]
+        for question in generatedQuestions {
+            promptIndex[Self.normalizedPrompt(question.prompt)] = question
+        }
+        for question in newQuestions {
+            promptIndex[Self.normalizedPrompt(question.prompt)] = question
+        }
+        generatedQuestions = promptIndex.values.sorted { $0.id < $1.id }
+        persistGeneratedQuestions()
+        rebuildQuestions()
+    }
+
+    func replaceGeneratedQuestions(_ newQuestions: [InterviewQuestion], for mode: PracticeMode) {
+        guard !newQuestions.isEmpty else { return }
+        generatedQuestions.removeAll { $0.mode == mode.rawValue }
+        upsertGeneratedQuestions(newQuestions)
+    }
+
+    func clearGeneratedQuestions() {
+        generatedQuestions = []
+        UserDefaults.standard.removeObject(forKey: Self.generatedQuestionsKey)
+        rebuildQuestions()
     }
 
     func questions(for role: InterviewRole) -> [InterviewQuestion] {
@@ -48,6 +91,31 @@ final class QuestionBank: ObservableObject {
 
     var difficulties: [String] {
         ["全部"] + QuestionDifficulty.allCases.map(\.rawValue)
+    }
+
+    private func rebuildQuestions() {
+        questions = Self.merged(bundled: bundledQuestions, generated: generatedQuestions)
+    }
+
+    private func persistGeneratedQuestions() {
+        guard let data = try? JSONEncoder().encode(generatedQuestions) else { return }
+        UserDefaults.standard.set(data, forKey: Self.generatedQuestionsKey)
+    }
+
+    private static func loadGeneratedQuestions() -> [InterviewQuestion] {
+        guard let data = UserDefaults.standard.data(forKey: generatedQuestionsKey),
+              let decoded = try? JSONDecoder().decode([InterviewQuestion].self, from: data)
+        else { return [] }
+        return decoded
+    }
+
+    private static func merged(bundled: [InterviewQuestion], generated: [InterviewQuestion]) -> [InterviewQuestion] {
+        var seenIDs = Set<String>()
+        return (bundled + generated).filter { seenIDs.insert($0.id).inserted }
+    }
+
+    private static func normalizedPrompt(_ prompt: String) -> String {
+        prompt.lowercased().filter { !$0.isWhitespace }
     }
 
 }

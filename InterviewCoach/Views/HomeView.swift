@@ -41,10 +41,23 @@ struct HomeView: View {
 
                     // Resume or Upload
                     if let profile = viewModel.resumeProfile {
-                        ResumeSummaryView(profile: profile) {
-                            viewModel.startTechStackPractice()
-                            selectedTab = 2
-                        }
+                        ResumeSummaryView(
+                            profile: profile,
+                            generatedQuestionCount: viewModel.questionBank.aiTechGeneratedCount,
+                            isGeneratingQuestions: viewModel.isGeneratingTechQuestions,
+                            onReplaceResume: { isImporterPresented = true },
+                            onGenerateQuestions: {
+                                Task {
+                                    if await viewModel.generateTechStackQuestions() {
+                                        selectedTab = 2
+                                    }
+                                }
+                            },
+                            onStartTechStackPractice: {
+                                viewModel.startTechStackPractice()
+                                selectedTab = 2
+                            }
+                        )
                     } else {
                         uploadResumePanel
                     }
@@ -122,14 +135,8 @@ struct HomeView: View {
                         .frame(width: 42, height: 42)
                         .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("训练计划")
-                            .font(.system(size: 22, weight: .semibold))
-                        Text(planSummary)
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    Text("训练计划")
+                        .font(.system(size: 22, weight: .semibold))
 
                     Spacer()
 
@@ -139,6 +146,11 @@ struct HomeView: View {
                         .padding(.vertical, 6)
                         .background(Color(.tertiarySystemFill), in: Capsule())
                 }
+
+                Text(planSummary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     planMetric(title: "目标岗位", value: targetRoleName, icon: "person.crop.rectangle")
@@ -369,12 +381,49 @@ struct HomeView: View {
 
     private var jobDescriptionEditor: some View {
         VStack(alignment: .leading, spacing: 12) {
-            TextEditor(text: $viewModel.jobDescriptionText)
-                .font(.system(size: 15))
-                .frame(minHeight: 132)
-                .padding(10)
-                .scrollContentBackground(.hidden)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            ZStack(alignment: .topLeading) {
+                TextEditor(text: $viewModel.jobDescriptionText)
+                    .font(.system(size: 15))
+                    .frame(height: 132)
+                    .padding(10)
+                    .scrollContentBackground(.hidden)
+
+                if viewModel.jobDescriptionText.isEmpty {
+                    Text("在这里粘贴完整 JD，建议包含岗位职责和任职要求")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.tertiary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 18)
+                        .allowsHitTesting(false)
+                }
+            }
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            Button {
+                Task {
+                    if await viewModel.generateJobDescriptionQuestions() {
+                        isJobDescriptionEditorExpanded = false
+                        selectedTab = 2
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if viewModel.isGeneratingJobQuestions {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text(viewModel.isGeneratingJobQuestions ? "DeepSeek 正在生成题目" : "DeepSeek 生成 JD 题目")
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 46)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(
+                viewModel.jobDescriptionText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    || viewModel.isGeneratingJobQuestions
+            )
 
             HStack(spacing: 10) {
                 Button {
@@ -383,17 +432,17 @@ struct HomeView: View {
                         isJobDescriptionEditorExpanded = false
                     }
                 } label: {
-                    Label("分析 JD", systemImage: "wand.and.stars")
+                    Label("仅分析 JD", systemImage: "text.magnifyingglass")
                         .frame(maxWidth: .infinity)
                         .frame(height: 44)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
 
                 Button {
                     viewModel.loadSampleJobDescription()
                     isJobDescriptionEditorExpanded = false
                 } label: {
-                    Label("样例", systemImage: "doc.text")
+                    Label("填入样例", systemImage: "doc.text")
                         .frame(maxWidth: .infinity)
                         .frame(height: 44)
                 }
@@ -421,7 +470,7 @@ struct HomeView: View {
                         .lineLimit(2)
                 }
                 Spacer()
-                Text("\(viewModel.jobTargetQuestions.count) 题")
+                Text(jobQuestionCountText)
                     .font(.system(size: 13, weight: .semibold))
                     .padding(.horizontal, 9)
                     .padding(.vertical, 6)
@@ -452,6 +501,28 @@ struct HomeView: View {
                 }
             }
 
+            Button {
+                Task {
+                    if await viewModel.generateJobDescriptionQuestions() {
+                        selectedTab = 2
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if viewModel.isGeneratingJobQuestions {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text(viewModel.isGeneratingJobQuestions ? "DeepSeek 正在生成题目" : jobGenerationButtonTitle)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 46)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(viewModel.isGeneratingJobQuestions)
+
             HStack(spacing: 10) {
                 Button {
                     viewModel.startJobTargetPractice()
@@ -461,7 +532,7 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 44)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.bordered)
 
                 Menu {
                     Button("重新编辑") {
@@ -492,9 +563,21 @@ struct HomeView: View {
 
     private var jobDescriptionSubtitle: String {
         if let profile = viewModel.jobTargetProfile {
-            return "已按 \(profile.primaryRole.rawValue) 和 \(profile.seniority.rawValue) 难度生成岗位专项训练。"
+            if viewModel.questionBank.aiJobGeneratedCount > 0 {
+                return "DeepSeek 已按 \(profile.primaryRole.rawValue) 和 \(profile.seniority.rawValue) 难度生成岗位专项题。"
+            }
+            return "已提取 \(profile.requiredSkills.count) 项岗位要求，可继续让 DeepSeek 生成专项题。"
         }
-        return "把招聘 JD 粘贴进来，系统会提取必备技能、职责和简历差距。"
+        return "粘贴招聘 JD，DeepSeek 会围绕岗位技术栈、场景排障和交付能力出题。"
+    }
+
+    private var jobQuestionCountText: String {
+        let aiCount = viewModel.questionBank.aiJobGeneratedCount
+        return aiCount > 0 ? "AI \(aiCount) 题" : "匹配 \(viewModel.jobTargetQuestions.count) 题"
+    }
+
+    private var jobGenerationButtonTitle: String {
+        viewModel.questionBank.aiJobGeneratedCount > 0 ? "DeepSeek 重新生成 JD 题目" : "DeepSeek 生成 JD 题目"
     }
 
     private func quickAction(icon: String, title: String, color: Color, action: @escaping () -> Void) -> some View {

@@ -2,6 +2,10 @@ import SwiftUI
 
 struct ResumeSummaryView: View {
     let profile: ResumeProfile
+    var generatedQuestionCount = 0
+    var isGeneratingQuestions = false
+    var onReplaceResume: (() -> Void)? = nil
+    var onGenerateQuestions: (() -> Void)? = nil
     var onStartTechStackPractice: (() -> Void)? = nil
 
     var body: some View {
@@ -17,10 +21,22 @@ struct ResumeSummaryView: View {
                             .lineLimit(2)
                     }
                     Spacer()
-                    Text("\(Int(profile.confidence * 100))%")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(.blue)
-                        .accessibilityLabel("匹配置信度 \(Int(profile.confidence * 100))%")
+                    VStack(alignment: .trailing, spacing: 8) {
+                        Text("\(Int(profile.confidence * 100))%")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.blue)
+                            .accessibilityLabel("匹配置信度 \(Int(profile.confidence * 100))%")
+                        if let onReplaceResume {
+                            Button(action: onReplaceResume) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .frame(width: 32, height: 32)
+                            }
+                            .buttonStyle(.bordered)
+                            .help("重新上传简历")
+                            .accessibilityLabel("重新上传简历")
+                        }
+                    }
                 }
 
                 HStack {
@@ -31,13 +47,34 @@ struct ResumeSummaryView: View {
 
                 techStackSection
 
-                if let onStartTechStackPractice, !techStackEntities.isEmpty {
-                    Button(action: onStartTechStackPractice) {
-                        Label("技术栈专项训练", systemImage: "terminal")
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 44)
+                if let onGenerateQuestions, !techStackEntities.isEmpty {
+                    Button(action: onGenerateQuestions) {
+                        HStack(spacing: 8) {
+                            if isGeneratingQuestions {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else {
+                                Image(systemName: "sparkles")
+                            }
+                            Text(isGeneratingQuestions ? "AI 正在生成专项题" : "AI 生成技术栈专项题")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .frame(height: 44)
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(isGeneratingQuestions)
+                }
+
+                if let onStartTechStackPractice, !techStackEntities.isEmpty {
+                    Button(action: onStartTechStackPractice) {
+                        Label(
+                            generatedQuestionCount > 0 ? "开始专项训练 · 含 \(generatedQuestionCount) 道 AI 题" : "使用现有题库训练",
+                            systemImage: "terminal"
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                    }
+                    .buttonStyle(.bordered)
                 }
             }
         }
@@ -64,6 +101,12 @@ struct ResumeSummaryView: View {
                     .padding(.horizontal, 8)
                     .padding(.vertical, 5)
                     .background(Color(.tertiarySystemFill), in: Capsule())
+            }
+
+            if generatedQuestionCount > 0 {
+                Label("已保存 \(generatedQuestionCount) 道 AI 技术栈专项题", systemImage: "checkmark.circle")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.green)
             }
 
             if techStackEntities.isEmpty {

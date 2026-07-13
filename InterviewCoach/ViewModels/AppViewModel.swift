@@ -16,6 +16,10 @@ final class AppViewModel: ObservableObject {
     @Published var isImportingResume = false
     @Published var isEvaluating = false
     @Published var isCoaching = false
+    @Published var isGeneratingTechQuestions = false
+    @Published var isGeneratingJobQuestions = false
+    @Published private(set) var lastGeneratedTechQuestionCount = 0
+    @Published private(set) var lastGeneratedJobQuestionCount = 0
     @Published var activeAIProviderName: String
     @Published var selectedPracticeMode: PracticeMode = .resume {
         didSet { refreshVisibleQuestions() }
@@ -48,7 +52,7 @@ final class AppViewModel: ObservableObject {
     @Published private(set) var wrongQuestionCount = 0
 
     // MARK: - Sub-objects
-    let questionBank = QuestionBank()
+    let questionBank = QuestionBank(loadsPersistedGeneratedQuestions: true)
     let reviewStore = ReviewStore()
     private let resumeAnalyzer = ResumeAnalyzer()
     private let jobDescriptionAnalyzer = JobDescriptionAnalyzer()
@@ -60,6 +64,7 @@ final class AppViewModel: ObservableObject {
     private var cachedDailyDrillQuestions: [InterviewQuestion] = []
     private var practiceModeCounts: [PracticeMode: Int] = [:]
     private static let savedJobDescriptionKey = "InterviewCoach.savedJobDescription"
+    private static let savedResumeProfileKey = "InterviewCoach.savedResumeProfile.v1"
 
     // MARK: - Init
 
@@ -69,6 +74,11 @@ final class AppViewModel: ObservableObject {
         let defaults = questionBank.questions.prefix(8).map { $0 }
         recommendedQuestions = defaults
         currentQuestions = defaults
+
+        if let data = UserDefaults.standard.data(forKey: Self.savedResumeProfileKey),
+           let savedProfile = try? JSONDecoder().decode(ResumeProfile.self, from: data) {
+            resumeProfile = savedProfile
+        }
 
         let savedJobDescription = UserDefaults.standard.string(forKey: Self.savedJobDescriptionKey) ?? ""
         let cleanedJobDescription = savedJobDescription.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -215,6 +225,13 @@ final class AppViewModel: ObservableObject {
         refreshReviewProgressState()
     }
 
+    func clearAIGeneratedQuestions() {
+        questionBank.clearGeneratedQuestions()
+        lastGeneratedTechQuestionCount = 0
+        lastGeneratedJobQuestionCount = 0
+        refreshDerivedQuestionState(updateRecommendations: true)
+    }
+
     // MARK: - Practice Flow
 
     func startPractice(with questions: [InterviewQuestion]? = nil) {
@@ -305,6 +322,98 @@ final class AppViewModel: ObservableObject {
         }
         selectedPracticeMode = .tech
         startPractice(with: questions)
+    }
+
+    @discardableResult
+    func generateTechStackQuestions(count: Int = 12) async -> Bool {
+        guard !isGeneratingTechQuestions else { return false }
+        guard let profile = resumeProfile else {
+            importError = "先上传简历，系统会提取技术栈后再生成专项题。"
+            return false
+        }
+        guard AIServiceFactory.currentDeepSeekKey() != nil else {
+            importError = "先在“我的”页面保存 DeepSeek API Key，再使用 AI 专项出题。"
+            return false
+        }
+
+        let techStack = profile.techStack.isEmpty
+            ? profile.skills.prefix(16).map {
+                TechStackEntity(name: $0, category: .other, confidence: 0.5, evidence: [$0])
+            }
+            : Array(profile.techStack.prefix(16))
+        guard !techStack.isEmpty else {
+            importError = "这份简历暂未识别到技术栈，请换一份包含工具、平台、框架或数据库名称的简历。"
+            return false
+        }
+
+        isGeneratingTechQuestions = true
+        importError = nil
+        defer { isGeneratingTechQuestions = false }
+
+        do {
+            let generated = try await aiService.generateTechnicalQuestions(
+                for: techStack,
+                role: profile.primaryRole,
+                seniority: profile.seniority,
+                count: count
+            )
+            questionBank.upsertGeneratedQuestions(generated)
+            lastGeneratedTechQuestionCount = generated.count
+            refreshDerivedQuestionState(updateRecommendations: true)
+            selectedPracticeMode = .tech
+            startPractice(with: generated)
+            return true
+        } catch is CancellationError {
+            importError = "已取消本次 AI 出题。"
+        } catch {
+            importError = error.localizedDescription
+        }
+        return false
+    }
+
+    @discardableResult
+    func generateJobDescriptionQuestions(count: Int = 12) async -> Bool {
+        guard !isGeneratingJobQuestions else { return false }
+        let cleaned = jobDescriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else {
+            importError = "先粘贴目标岗位 JD，再让 DeepSeek 生成题目。"
+            return false
+        }
+
+        jobDescriptionText = cleaned
+        let profile = jobDescriptionAnalyzer.analyze(text: cleaned, resumeProfile: resumeProfile)
+        jobTargetProfile = profile
+        UserDefaults.standard.set(cleaned, forKey: Self.savedJobDescriptionKey)
+        refreshRecommendations()
+
+        guard AIServiceFactory.currentDeepSeekKey() != nil else {
+            importError = "已完成 JD 分析；请先在“我的”页面保存 DeepSeek API Key，再生成专项题。"
+            return false
+        }
+
+        isGeneratingJobQuestions = true
+        importError = nil
+        defer { isGeneratingJobQuestions = false }
+
+        do {
+            let generated = try await aiService.generateJobDescriptionQuestions(
+                jobDescription: cleaned,
+                profile: profile,
+                resumeTechStack: resumeProfile?.techStack ?? [],
+                count: count
+            )
+            questionBank.replaceGeneratedQuestions(generated, for: .jobTarget)
+            lastGeneratedJobQuestionCount = generated.count
+            refreshDerivedQuestionState(updateRecommendations: true)
+            selectedPracticeMode = .jobTarget
+            startPractice(with: generated)
+            return true
+        } catch is CancellationError {
+            importError = "已取消本次 JD 出题。"
+        } catch {
+            importError = error.localizedDescription
+        }
+        return false
     }
 
     func goToNextQuestion() {
@@ -471,6 +580,9 @@ final class AppViewModel: ObservableObject {
 
     private func applyResumeProfile(_ profile: ResumeProfile) {
         resumeProfile = profile
+        if let data = try? JSONEncoder().encode(profile) {
+            UserDefaults.standard.set(data, forKey: Self.savedResumeProfileKey)
+        }
         let cleanedJobDescription = jobDescriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
         if !cleanedJobDescription.isEmpty {
             jobTargetProfile = jobDescriptionAnalyzer.analyze(text: cleanedJobDescription, resumeProfile: profile)

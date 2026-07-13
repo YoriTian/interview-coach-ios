@@ -13,6 +13,16 @@ struct QuestionBankView: View {
                         .font(.system(size: 34, weight: .semibold))
                         .padding(.top, 12)
 
+                    if viewModel.questionBank.aiGeneratedCount > 0 {
+                        Label(
+                            "AI 专项题 \(viewModel.questionBank.aiGeneratedCount) 道 · 技术栈 \(viewModel.questionBank.aiTechGeneratedCount) · JD \(viewModel.questionBank.aiJobGeneratedCount)",
+                            systemImage: "sparkles"
+                        )
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(.blue)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+
                     // Practice Mode Selector
                     PracticeModeSelector(selection: $viewModel.selectedPracticeMode) { mode in
                         viewModel.modeCount(for: mode)

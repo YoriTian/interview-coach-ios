@@ -14,6 +14,15 @@ enum DeepSeekModel: String, CaseIterable, Identifiable {
         case .pro: return "DeepSeek V4 Pro"
         }
     }
+
+    var detail: String {
+        switch self {
+        case .flash: return "响应更快，适合日常练习"
+        case .pro: return "深度思考，适合严格评分与专项出题"
+        }
+    }
+
+    var usesDeepThinking: Bool { self == .pro }
 }
 
 enum DeepSeekAPIError: LocalizedError {
@@ -22,6 +31,8 @@ enum DeepSeekAPIError: LocalizedError {
     case httpStatus(code: Int, message: String)
     case emptyChoice
     case invalidJSON
+    case network(String)
+    case noGeneratedQuestions
 
     var errorDescription: String? {
         switch self {
@@ -35,6 +46,10 @@ enum DeepSeekAPIError: LocalizedError {
             return "DeepSeek 没有返回可用回答。"
         case .invalidJSON:
             return "DeepSeek 返回的 JSON 格式不符合预期。"
+        case .network(let message):
+            return "网络请求失败：\(message)"
+        case .noGeneratedQuestions:
+            return "DeepSeek 没有生成可用题目，请稍后重试。"
         }
     }
 }
@@ -43,6 +58,7 @@ enum DeepSeekAPIError: LocalizedError {
 
 enum DeepSeekClient {
     static func makeChatCompletionRequest(apiKey: String, model: String, system: String, user: String, maxTokens: Int) throws -> URLRequest {
+        let selectedModel = DeepSeekModel(rawValue: model) ?? .pro
         let body = ChatCompletionRequest(
             model: model,
             messages: [
@@ -50,13 +66,15 @@ enum DeepSeekClient {
                 ChatMessage(role: "user", content: user)
             ],
             responseFormat: ResponseFormat(type: "json_object"),
-            thinking: Thinking(type: "disabled"),
+            thinking: Thinking(type: selectedModel.usesDeepThinking ? "enabled" : "disabled"),
+            reasoningEffort: selectedModel.usesDeepThinking ? "high" : nil,
             maxTokens: maxTokens
         )
         var request = URLRequest(url: URL(string: "https://api.deepseek.com/chat/completions")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = selectedModel.usesDeepThinking ? 120 : 60
         request.httpBody = try JSONEncoder().encode(body)
         return request
     }
@@ -202,6 +220,168 @@ enum DeepSeekClient {
         return techStackEntities(from: ai)
     }
 
+    static func generateTechnicalQuestions(
+        for techStack: [TechStackEntity],
+        role: InterviewRole,
+        seniority: QuestionDifficulty,
+        count: Int,
+        model: String
+    ) async throws -> [InterviewQuestion] {
+        let selectedStack = Array(techStack.prefix(16))
+        let stackDescription = selectedStack
+            .map { "\($0.name)（\($0.category.rawValue)）" }
+            .joined(separator: "、")
+        let requestedCount = min(20, max(6, count))
+        let ai = try await requestJSON(
+            model: model,
+            system: "你是高级技术面试题库专家，只围绕候选人的技术栈生成可验证、可追问的技术题。",
+            user: """
+            只输出 JSON，不要 Markdown。
+            候选岗位：\(role.rawValue)
+            能力级别：\(seniority.rawValue)
+            技术栈：\(stackDescription)
+
+            生成 \(requestedCount) 道中文面试题。只考技术原理、实际配置、故障排查、架构取舍、安全、性能和发布回滚；不要询问公司名、客户名、具体项目名称或简历经历。
+            要求：
+            1. 覆盖尽可能多的技术栈，每道题标明主要 stack。
+            2. 至少三分之一是故障排查题，至少两道是跨技术栈联动题。
+            3. 问题必须能区分背概念和真正做过，避免“请简单介绍”这种空题。
+            4. idealPoints 给出 3 到 6 个评分要点；sampleAnswer 是 60 到 90 秒口述思路，不虚构候选人经历。
+            5. category 只能是“专业能力”“方案设计”“案例分析”；difficulty 只能是“初级”“中级”“高级”。
+
+            返回 JSON：
+            {
+              "questions":[
+                {
+                  "stack":"Kubernetes",
+                  "category":"案例分析",
+                  "difficulty":"高级",
+                  "prompt":"题目",
+                  "keywords":["关键词"],
+                  "idealPoints":["评分要点"],
+                  "sampleAnswer":"口述思路",
+                  "followUps":["追问"],
+                  "timeLimitSeconds":240
+                }
+              ]
+            }
+            """,
+            maxTokens: 7_000,
+            as: AIGeneratedQuestionSet.self
+        )
+
+        let questions = generatedQuestions(
+            from: ai,
+            role: role,
+            fallbackDifficulty: seniority,
+            mode: .tech,
+            idPrefix: "ai-tech"
+        )
+        guard !questions.isEmpty else { throw DeepSeekAPIError.noGeneratedQuestions }
+        return Array(questions.prefix(requestedCount))
+    }
+
+    static func generateJobDescriptionQuestions(
+        jobDescription: String,
+        profile: JobDescriptionProfile,
+        resumeTechStack: [TechStackEntity],
+        count: Int,
+        model: String
+    ) async throws -> [InterviewQuestion] {
+        let clippedJobDescription = String(jobDescription.prefix(12_000))
+        let requestedCount = min(20, max(6, count))
+        let requiredSkills = profile.requiredSkills.prefix(20).joined(separator: "、")
+        let responsibilities = profile.responsibilities.prefix(12).joined(separator: "；")
+        let resumeStack = resumeTechStack.prefix(16).map(\.name).joined(separator: "、")
+        let gaps = profile.gapKeywords.prefix(16).joined(separator: "、")
+        let ai = try await requestJSON(
+            model: model,
+            system: "你是高级招聘面试题库专家。你只根据目标岗位 JD 的能力要求生成可验证、可追问的中文面试题。",
+            user: """
+            只输出 JSON，不要 Markdown。
+            目标岗位：\(profile.title)
+            岗位方向：\(profile.primaryRole.rawValue)
+            能力级别：\(profile.seniority.rawValue)
+            已提取的岗位技能：\(requiredSkills.isEmpty ? "未提取" : requiredSkills)
+            已提取的岗位职责：\(responsibilities.isEmpty ? "未提取" : responsibilities)
+            候选人简历技术栈：\(resumeStack.isEmpty ? "未上传简历" : resumeStack)
+            优先补齐项：\(gaps.isEmpty ? "暂无" : gaps)
+
+            JD 原文：
+            \(clippedJobDescription)
+
+            生成 \(requestedCount) 道岗位专项面试题，重点考察 JD 明确要求的技术栈和交付能力，不要围绕候选人的项目经历出题。
+            要求：
+            1. 至少一半题目直接考察 JD 中的技术栈、工具、框架、平台或方法论。
+            2. 覆盖原理与配置、故障排查、方案取舍、上线回滚、性能安全、协作交付；至少三分之一为场景排障题。
+            3. 对简历未覆盖但 JD 要求的能力优先出题；不要编造 JD 中不存在的硬性技术要求。
+            4. 不得在题目中出现公司名、客户名、联系人、薪资或招聘平台信息。
+            5. 问题要能区分背概念和真实实践，避免“简单介绍一下”这类空题。
+            6. stack 填该题主要考察的技术或能力；idealPoints 给 3 到 6 个评分要点；sampleAnswer 给 60 到 90 秒口述思路，不虚构候选人经历。
+            7. category 只能是“专业能力”“方案设计”“案例分析”；difficulty 只能是“初级”“中级”“高级”。
+
+            返回 JSON：
+            {
+              "questions":[
+                {
+                  "stack":"Kubernetes",
+                  "category":"案例分析",
+                  "difficulty":"高级",
+                  "prompt":"题目",
+                  "keywords":["关键词"],
+                  "idealPoints":["评分要点"],
+                  "sampleAnswer":"口述思路",
+                  "followUps":["追问"],
+                  "timeLimitSeconds":240
+                }
+              ]
+            }
+            """,
+            maxTokens: 7_000,
+            as: AIGeneratedQuestionSet.self
+        )
+
+        let questions = generatedQuestions(
+            from: ai,
+            role: profile.primaryRole,
+            fallbackDifficulty: profile.seniority,
+            mode: .jobTarget,
+            idPrefix: "ai-jd"
+        )
+        guard !questions.isEmpty else { throw DeepSeekAPIError.noGeneratedQuestions }
+        return Array(questions.prefix(requestedCount))
+    }
+
+    static func decodeGeneratedQuestionsJSON(
+        _ content: String,
+        role: InterviewRole,
+        fallbackDifficulty: QuestionDifficulty
+    ) throws -> [InterviewQuestion] {
+        let payload = try decodeJSON(AIGeneratedQuestionSet.self, from: content)
+        return generatedQuestions(
+            from: payload,
+            role: role,
+            fallbackDifficulty: fallbackDifficulty,
+            mode: .tech,
+            idPrefix: "ai-tech"
+        )
+    }
+
+    static func decodeGeneratedJobQuestionsJSON(
+        _ content: String,
+        role: InterviewRole,
+        fallbackDifficulty: QuestionDifficulty
+    ) throws -> [InterviewQuestion] {
+        let payload = try decodeJSON(AIGeneratedQuestionSet.self, from: content)
+        return generatedQuestions(
+            from: payload,
+            role: role,
+            fallbackDifficulty: fallbackDifficulty,
+            mode: .jobTarget,
+            idPrefix: "ai-jd"
+        )
+    }
+
     /// Backward-compatible evaluate for AnswerEvaluation
     static func evaluate(answer: String, for question: InterviewQuestion, profile: ResumeProfile?, model: String) async throws -> AnswerEvaluation {
         let result = try await score(question: question, answer: answer, model: model)
@@ -239,8 +419,57 @@ enum DeepSeekClient {
             user: user,
             maxTokens: maxTokens
         )
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let (data, response) = try await performRequest(request)
         return try decodeChatCompletionResponse(type, data: data, response: response)
+    }
+
+    private static func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        let maximumAttempts = 2
+
+        for attempt in 1...maximumAttempts {
+            try Task.checkCancellation()
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                if let statusCode = (response as? HTTPURLResponse)?.statusCode,
+                   isRetryableStatus(statusCode),
+                   attempt < maximumAttempts {
+                    try await Task.sleep(nanoseconds: 700_000_000)
+                    continue
+                }
+                return (data, response)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                guard attempt < maximumAttempts, isRetryableNetworkError(error) else {
+                    throw friendlyNetworkError(error)
+                }
+                try await Task.sleep(nanoseconds: 700_000_000)
+            }
+        }
+
+        throw DeepSeekAPIError.network("请求未完成，请检查网络后重试。")
+    }
+
+    private static func isRetryableStatus(_ statusCode: Int) -> Bool {
+        statusCode == 408 || statusCode == 429 || (500...599).contains(statusCode)
+    }
+
+    private static func isRetryableNetworkError(_ error: Error) -> Bool {
+        guard let urlError = error as? URLError else { return false }
+        return [.timedOut, .networkConnectionLost, .notConnectedToInternet, .cannotConnectToHost, .dnsLookupFailed]
+            .contains(urlError.code)
+    }
+
+    private static func friendlyNetworkError(_ error: Error) -> Error {
+        guard let urlError = error as? URLError else { return error }
+        switch urlError.code {
+        case .timedOut:
+            return DeepSeekAPIError.network("AI 思考超时，请重新提交。")
+        case .notConnectedToInternet:
+            return DeepSeekAPIError.network("当前没有可用网络。")
+        default:
+            return DeepSeekAPIError.network(urlError.localizedDescription)
+        }
     }
 
     private static func aiScoreResult<T: AIScorePayload>(_ ai: T, fallback: ScoreResult) -> ScoreResult {
@@ -344,6 +573,68 @@ enum DeepSeekClient {
         default: return rawName.trimmingCharacters(in: .whitespacesAndNewlines)
         }
     }
+
+    private static func generatedQuestions(
+        from payload: AIGeneratedQuestionSet,
+        role: InterviewRole,
+        fallbackDifficulty: QuestionDifficulty,
+        mode: PracticeMode,
+        idPrefix: String
+    ) -> [InterviewQuestion] {
+        var seenPrompts = Set<String>()
+        return (payload.questions ?? []).compactMap { item in
+            guard let rawPrompt = item.prompt?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  rawPrompt.count >= 8 else { return nil }
+            let normalizedPrompt = rawPrompt.lowercased().filter { !$0.isWhitespace }
+            guard seenPrompts.insert(normalizedPrompt).inserted else { return nil }
+
+            let stack = item.stack?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfBlank
+            let keywords = cleaned(item.keywords, limit: 10)
+            let combinedKeywords = uniqueStrings((stack.map { [$0] } ?? []) + keywords, limit: 10)
+            let idealPoints = cleaned(item.idealPoints, limit: 6)
+            let followUps = cleaned(item.followUps, limit: 4)
+            let difficulty = QuestionDifficulty(fromTrainerString: item.difficulty ?? fallbackDifficulty.rawValue)
+            let category = InterviewCategory(fromTrainerString: item.category ?? InterviewCategory.technical.rawValue)
+            let timeLimit = min(600, max(90, item.timeLimitSeconds ?? 240))
+
+            return InterviewQuestion(
+                id: "\(idPrefix)-\(stableIdentifier(stack: stack ?? mode.rawValue, prompt: rawPrompt))",
+                role: role,
+                category: category,
+                difficulty: difficulty,
+                mode: mode.rawValue,
+                prompt: rawPrompt,
+                expectedKeywords: combinedKeywords,
+                keywords: combinedKeywords,
+                idealPoints: idealPoints,
+                sampleAnswer: item.sampleAnswer?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
+                followUps: followUps,
+                timeLimitSeconds: timeLimit,
+                resources: []
+            )
+        }
+    }
+
+    private static func cleaned(_ values: [String]?, limit: Int) -> [String] {
+        uniqueStrings(
+            (values ?? []).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty },
+            limit: limit
+        )
+    }
+
+    private static func uniqueStrings(_ values: [String], limit: Int) -> [String] {
+        var seen = Set<String>()
+        return Array(values.filter { seen.insert($0.lowercased()).inserted }.prefix(limit))
+    }
+
+    private static func stableIdentifier(stack: String, prompt: String) -> String {
+        var hash: UInt64 = 14_695_981_039_346_656_037
+        for byte in "\(stack)|\(prompt)".utf8 {
+            hash ^= UInt64(byte)
+            hash &*= 1_099_511_628_211
+        }
+        return String(hash, radix: 16)
+    }
 }
 
 // MARK: - Private Types
@@ -362,11 +653,13 @@ private struct ChatCompletionRequest: Encodable {
     let messages: [ChatMessage]
     let responseFormat: ResponseFormat
     let thinking: Thinking
+    let reasoningEffort: String?
     let maxTokens: Int
 
     enum CodingKeys: String, CodingKey {
         case model, messages, thinking
         case responseFormat = "response_format"
+        case reasoningEffort = "reasoning_effort"
         case maxTokens = "max_tokens"
     }
 }
@@ -443,6 +736,22 @@ private struct AITechStackEntity: Decodable {
     let category: String?
     let confidence: Double?
     let evidence: [String]?
+}
+
+private struct AIGeneratedQuestionSet: Decodable {
+    let questions: [AIGeneratedQuestion]?
+}
+
+private struct AIGeneratedQuestion: Decodable {
+    let stack: String?
+    let category: String?
+    let difficulty: String?
+    let prompt: String?
+    let keywords: [String]?
+    let idealPoints: [String]?
+    let sampleAnswer: String?
+    let followUps: [String]?
+    let timeLimitSeconds: Int?
 }
 
 private struct DeepSeekErrorResponse: Decodable {
