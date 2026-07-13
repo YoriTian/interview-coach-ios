@@ -30,6 +30,12 @@ final class QuestionBank: ObservableObject {
     }
 
     var aiGeneratedCount: Int { generatedQuestions.count }
+    var aiTechGeneratedCount: Int {
+        generatedQuestions.filter { $0.mode == PracticeMode.tech.rawValue }.count
+    }
+    var aiJobGeneratedCount: Int {
+        generatedQuestions.filter { $0.mode == PracticeMode.jobTarget.rawValue }.count
+    }
 
     func upsertGeneratedQuestions(_ newQuestions: [InterviewQuestion]) {
         guard !newQuestions.isEmpty else { return }
@@ -43,6 +49,12 @@ final class QuestionBank: ObservableObject {
         generatedQuestions = promptIndex.values.sorted { $0.id < $1.id }
         persistGeneratedQuestions()
         rebuildQuestions()
+    }
+
+    func replaceGeneratedQuestions(_ newQuestions: [InterviewQuestion], for mode: PracticeMode) {
+        guard !newQuestions.isEmpty else { return }
+        generatedQuestions.removeAll { $0.mode == mode.rawValue }
+        upsertGeneratedQuestions(newQuestions)
     }
 
     func clearGeneratedQuestions() {

@@ -75,13 +75,48 @@ final class DeepSeekClientTests: XCTestCase {
         )
 
         let question = try XCTUnwrap(questions.first)
-        XCTAssertTrue(question.id.hasPrefix("ai-"))
+        XCTAssertTrue(question.id.hasPrefix("ai-tech-"))
         XCTAssertEqual(question.role, .operations)
         XCTAssertEqual(question.mode, PracticeMode.tech.rawValue)
         XCTAssertEqual(question.category, .caseStudy)
         XCTAssertEqual(question.difficulty, .senior)
         XCTAssertEqual(question.keywords.first, "Kubernetes")
         XCTAssertEqual(question.timeLimitSeconds, 240)
+    }
+
+    func testDecodesGeneratedJobDescriptionQuestions() throws {
+        let content = """
+        {
+          "questions": [
+            {
+              "stack": "CI/CD",
+              "category": "方案设计",
+              "difficulty": "中级",
+              "prompt": "请设计一条支持灰度发布、质量门禁和一键回滚的 CI/CD 流水线，并说明失败时如何止损。",
+              "keywords": ["质量门禁", "灰度发布", "回滚"],
+              "idealPoints": ["分阶段流水线", "制品不可变", "回滚触发条件"],
+              "sampleAnswer": "先定义流水线阶段和质量门禁，再说明灰度指标、回滚条件与审计机制。",
+              "followUps": ["数据库变更如何回滚？"],
+              "timeLimitSeconds": 300
+            }
+          ]
+        }
+        """
+
+        let questions = try DeepSeekClient.decodeGeneratedJobQuestionsJSON(
+            content,
+            role: .operations,
+            fallbackDifficulty: .mid
+        )
+
+        let question = try XCTUnwrap(questions.first)
+        XCTAssertTrue(question.id.hasPrefix("ai-jd-"))
+        XCTAssertEqual(question.role, .operations)
+        XCTAssertEqual(question.mode, PracticeMode.jobTarget.rawValue)
+        XCTAssertEqual(question.category, .systemDesign)
+        XCTAssertEqual(question.difficulty, .mid)
+        XCTAssertEqual(question.keywords.first, "CI/CD")
+        XCTAssertEqual(question.timeLimitSeconds, 300)
     }
 
     func testDecodesSuccessfulChatCompletionPayload() throws {

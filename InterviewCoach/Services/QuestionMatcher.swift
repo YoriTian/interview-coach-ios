@@ -50,6 +50,10 @@ struct QuestionMatcher {
             value += 8.0
         }
 
+        if jobDescription != nil, question.mode == PracticeMode.jobTarget.rawValue {
+            value += 12.0
+        }
+
         if question.role == .general {
             value += 2.5
         }

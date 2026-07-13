@@ -15,11 +15,12 @@ struct QuestionBankView: View {
 
                     if viewModel.questionBank.aiGeneratedCount > 0 {
                         Label(
-                            "已加入 \(viewModel.questionBank.aiGeneratedCount) 道 AI 技术栈专项题",
+                            "AI 专项题 \(viewModel.questionBank.aiGeneratedCount) 道 · 技术栈 \(viewModel.questionBank.aiTechGeneratedCount) · JD \(viewModel.questionBank.aiJobGeneratedCount)",
                             systemImage: "sparkles"
                         )
                         .font(.system(size: 14, weight: .medium))
                         .foregroundStyle(.blue)
+                        .fixedSize(horizontal: false, vertical: true)
                     }
 
                     // Practice Mode Selector

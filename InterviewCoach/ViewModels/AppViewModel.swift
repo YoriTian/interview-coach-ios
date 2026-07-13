@@ -17,7 +17,9 @@ final class AppViewModel: ObservableObject {
     @Published var isEvaluating = false
     @Published var isCoaching = false
     @Published var isGeneratingTechQuestions = false
+    @Published var isGeneratingJobQuestions = false
     @Published private(set) var lastGeneratedTechQuestionCount = 0
+    @Published private(set) var lastGeneratedJobQuestionCount = 0
     @Published var activeAIProviderName: String
     @Published var selectedPracticeMode: PracticeMode = .resume {
         didSet { refreshVisibleQuestions() }
@@ -226,6 +228,7 @@ final class AppViewModel: ObservableObject {
     func clearAIGeneratedQuestions() {
         questionBank.clearGeneratedQuestions()
         lastGeneratedTechQuestionCount = 0
+        lastGeneratedJobQuestionCount = 0
         refreshDerivedQuestionState(updateRecommendations: true)
     }
 
@@ -362,6 +365,51 @@ final class AppViewModel: ObservableObject {
             return true
         } catch is CancellationError {
             importError = "已取消本次 AI 出题。"
+        } catch {
+            importError = error.localizedDescription
+        }
+        return false
+    }
+
+    @discardableResult
+    func generateJobDescriptionQuestions(count: Int = 12) async -> Bool {
+        guard !isGeneratingJobQuestions else { return false }
+        let cleaned = jobDescriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleaned.isEmpty else {
+            importError = "先粘贴目标岗位 JD，再让 DeepSeek 生成题目。"
+            return false
+        }
+
+        jobDescriptionText = cleaned
+        let profile = jobDescriptionAnalyzer.analyze(text: cleaned, resumeProfile: resumeProfile)
+        jobTargetProfile = profile
+        UserDefaults.standard.set(cleaned, forKey: Self.savedJobDescriptionKey)
+        refreshRecommendations()
+
+        guard AIServiceFactory.currentDeepSeekKey() != nil else {
+            importError = "已完成 JD 分析；请先在“我的”页面保存 DeepSeek API Key，再生成专项题。"
+            return false
+        }
+
+        isGeneratingJobQuestions = true
+        importError = nil
+        defer { isGeneratingJobQuestions = false }
+
+        do {
+            let generated = try await aiService.generateJobDescriptionQuestions(
+                jobDescription: cleaned,
+                profile: profile,
+                resumeTechStack: resumeProfile?.techStack ?? [],
+                count: count
+            )
+            questionBank.replaceGeneratedQuestions(generated, for: .jobTarget)
+            lastGeneratedJobQuestionCount = generated.count
+            refreshDerivedQuestionState(updateRecommendations: true)
+            selectedPracticeMode = .jobTarget
+            startPractice(with: generated)
+            return true
+        } catch is CancellationError {
+            importError = "已取消本次 JD 出题。"
         } catch {
             importError = error.localizedDescription
         }

@@ -270,7 +270,84 @@ enum DeepSeekClient {
             as: AIGeneratedQuestionSet.self
         )
 
-        let questions = generatedQuestions(from: ai, role: role, fallbackDifficulty: seniority)
+        let questions = generatedQuestions(
+            from: ai,
+            role: role,
+            fallbackDifficulty: seniority,
+            mode: .tech,
+            idPrefix: "ai-tech"
+        )
+        guard !questions.isEmpty else { throw DeepSeekAPIError.noGeneratedQuestions }
+        return Array(questions.prefix(requestedCount))
+    }
+
+    static func generateJobDescriptionQuestions(
+        jobDescription: String,
+        profile: JobDescriptionProfile,
+        resumeTechStack: [TechStackEntity],
+        count: Int,
+        model: String
+    ) async throws -> [InterviewQuestion] {
+        let clippedJobDescription = String(jobDescription.prefix(12_000))
+        let requestedCount = min(20, max(6, count))
+        let requiredSkills = profile.requiredSkills.prefix(20).joined(separator: "、")
+        let responsibilities = profile.responsibilities.prefix(12).joined(separator: "；")
+        let resumeStack = resumeTechStack.prefix(16).map(\.name).joined(separator: "、")
+        let gaps = profile.gapKeywords.prefix(16).joined(separator: "、")
+        let ai = try await requestJSON(
+            model: model,
+            system: "你是高级招聘面试题库专家。你只根据目标岗位 JD 的能力要求生成可验证、可追问的中文面试题。",
+            user: """
+            只输出 JSON，不要 Markdown。
+            目标岗位：\(profile.title)
+            岗位方向：\(profile.primaryRole.rawValue)
+            能力级别：\(profile.seniority.rawValue)
+            已提取的岗位技能：\(requiredSkills.isEmpty ? "未提取" : requiredSkills)
+            已提取的岗位职责：\(responsibilities.isEmpty ? "未提取" : responsibilities)
+            候选人简历技术栈：\(resumeStack.isEmpty ? "未上传简历" : resumeStack)
+            优先补齐项：\(gaps.isEmpty ? "暂无" : gaps)
+
+            JD 原文：
+            \(clippedJobDescription)
+
+            生成 \(requestedCount) 道岗位专项面试题，重点考察 JD 明确要求的技术栈和交付能力，不要围绕候选人的项目经历出题。
+            要求：
+            1. 至少一半题目直接考察 JD 中的技术栈、工具、框架、平台或方法论。
+            2. 覆盖原理与配置、故障排查、方案取舍、上线回滚、性能安全、协作交付；至少三分之一为场景排障题。
+            3. 对简历未覆盖但 JD 要求的能力优先出题；不要编造 JD 中不存在的硬性技术要求。
+            4. 不得在题目中出现公司名、客户名、联系人、薪资或招聘平台信息。
+            5. 问题要能区分背概念和真实实践，避免“简单介绍一下”这类空题。
+            6. stack 填该题主要考察的技术或能力；idealPoints 给 3 到 6 个评分要点；sampleAnswer 给 60 到 90 秒口述思路，不虚构候选人经历。
+            7. category 只能是“专业能力”“方案设计”“案例分析”；difficulty 只能是“初级”“中级”“高级”。
+
+            返回 JSON：
+            {
+              "questions":[
+                {
+                  "stack":"Kubernetes",
+                  "category":"案例分析",
+                  "difficulty":"高级",
+                  "prompt":"题目",
+                  "keywords":["关键词"],
+                  "idealPoints":["评分要点"],
+                  "sampleAnswer":"口述思路",
+                  "followUps":["追问"],
+                  "timeLimitSeconds":240
+                }
+              ]
+            }
+            """,
+            maxTokens: 7_000,
+            as: AIGeneratedQuestionSet.self
+        )
+
+        let questions = generatedQuestions(
+            from: ai,
+            role: profile.primaryRole,
+            fallbackDifficulty: profile.seniority,
+            mode: .jobTarget,
+            idPrefix: "ai-jd"
+        )
         guard !questions.isEmpty else { throw DeepSeekAPIError.noGeneratedQuestions }
         return Array(questions.prefix(requestedCount))
     }
@@ -281,7 +358,28 @@ enum DeepSeekClient {
         fallbackDifficulty: QuestionDifficulty
     ) throws -> [InterviewQuestion] {
         let payload = try decodeJSON(AIGeneratedQuestionSet.self, from: content)
-        return generatedQuestions(from: payload, role: role, fallbackDifficulty: fallbackDifficulty)
+        return generatedQuestions(
+            from: payload,
+            role: role,
+            fallbackDifficulty: fallbackDifficulty,
+            mode: .tech,
+            idPrefix: "ai-tech"
+        )
+    }
+
+    static func decodeGeneratedJobQuestionsJSON(
+        _ content: String,
+        role: InterviewRole,
+        fallbackDifficulty: QuestionDifficulty
+    ) throws -> [InterviewQuestion] {
+        let payload = try decodeJSON(AIGeneratedQuestionSet.self, from: content)
+        return generatedQuestions(
+            from: payload,
+            role: role,
+            fallbackDifficulty: fallbackDifficulty,
+            mode: .jobTarget,
+            idPrefix: "ai-jd"
+        )
     }
 
     /// Backward-compatible evaluate for AnswerEvaluation
@@ -479,7 +577,9 @@ enum DeepSeekClient {
     private static func generatedQuestions(
         from payload: AIGeneratedQuestionSet,
         role: InterviewRole,
-        fallbackDifficulty: QuestionDifficulty
+        fallbackDifficulty: QuestionDifficulty,
+        mode: PracticeMode,
+        idPrefix: String
     ) -> [InterviewQuestion] {
         var seenPrompts = Set<String>()
         return (payload.questions ?? []).compactMap { item in
@@ -498,11 +598,11 @@ enum DeepSeekClient {
             let timeLimit = min(600, max(90, item.timeLimitSeconds ?? 240))
 
             return InterviewQuestion(
-                id: "ai-\(stableIdentifier(stack: stack ?? "tech", prompt: rawPrompt))",
+                id: "\(idPrefix)-\(stableIdentifier(stack: stack ?? mode.rawValue, prompt: rawPrompt))",
                 role: role,
                 category: category,
                 difficulty: difficulty,
-                mode: PracticeMode.tech.rawValue,
+                mode: mode.rawValue,
                 prompt: rawPrompt,
                 expectedKeywords: combinedKeywords,
                 keywords: combinedKeywords,

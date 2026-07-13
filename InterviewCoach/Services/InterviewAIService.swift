@@ -8,6 +8,12 @@ protocol InterviewAIProviding {
     func evaluateRecitation(question: InterviewQuestion, targetAnswer: String, originalAnswer: String, recitation: String) async throws -> RecitationResult
     func extractTechStackEntities(from resumeText: String) async throws -> [TechStackEntity]
     func generateTechnicalQuestions(for techStack: [TechStackEntity], role: InterviewRole, seniority: QuestionDifficulty, count: Int) async throws -> [InterviewQuestion]
+    func generateJobDescriptionQuestions(
+        jobDescription: String,
+        profile: JobDescriptionProfile,
+        resumeTechStack: [TechStackEntity],
+        count: Int
+    ) async throws -> [InterviewQuestion]
 }
 
 struct DeepSeekInterviewAIService: InterviewAIProviding {
@@ -38,6 +44,21 @@ struct DeepSeekInterviewAIService: InterviewAIProviding {
             for: techStack,
             role: role,
             seniority: seniority,
+            count: count,
+            model: model
+        )
+    }
+
+    func generateJobDescriptionQuestions(
+        jobDescription: String,
+        profile: JobDescriptionProfile,
+        resumeTechStack: [TechStackEntity],
+        count: Int
+    ) async throws -> [InterviewQuestion] {
+        try await DeepSeekClient.generateJobDescriptionQuestions(
+            jobDescription: jobDescription,
+            profile: profile,
+            resumeTechStack: resumeTechStack,
             count: count,
             model: model
         )
