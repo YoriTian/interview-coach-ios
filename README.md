@@ -11,11 +11,12 @@ This repository is privacy-sanitized. It does not include personal resumes, real
 - JD-based training: paste a job description and generate targeted practice
 - Multiple practice modes: resume follow-up, JD training, technical drills, project review, delivery scenarios, product manager, implementation engineer, wrong questions, daily drill, review plan, and flashcards
 - Speech input with Mandarin speech recognition
-- DeepSeek-compatible AI scoring and coaching
+- DeepSeek V4 Pro deep-thinking mode for AI scoring and coaching
+- AI-generated technical interview questions based only on extracted resume tech stacks
 - Target-answer generation, answer framework, key phrases, and recitation scoring
 - Mock interview session reports with weak-point summary and next actions
 - Spaced repetition and wrong-question tracking
-- Local-first storage with Keychain for API keys and UserDefaults for learning progress
+- Local-first storage with Keychain for API keys and UserDefaults for learning progress, resume profiles, and generated questions
 
 ## Privacy And Secrets
 

@@ -32,7 +32,10 @@ struct SettingsView: View {
                     }
 
                     if let profile = viewModel.resumeProfile {
-                        ResumeSummaryView(profile: profile)
+                        ResumeSummaryView(
+                            profile: profile,
+                            generatedQuestionCount: viewModel.questionBank.aiGeneratedCount
+                        )
                     }
 
                     SurfacePanel {
@@ -51,6 +54,20 @@ struct SettingsView: View {
                                 Spacer()
                             }
 
+                            if viewModel.questionBank.aiGeneratedCount > 0 {
+                                Button(role: .destructive) {
+                                    viewModel.clearAIGeneratedQuestions()
+                                } label: {
+                                    Label(
+                                        "清除 \(viewModel.questionBank.aiGeneratedCount) 道 AI 生成题",
+                                        systemImage: "sparkles"
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 44)
+                                }
+                                .buttonStyle(.bordered)
+                            }
+
                             Button(role: .destructive) {
                                 showResetConfirmation = true
                             } label: {
@@ -66,7 +83,7 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("备面Pro")
                                 .font(.system(size: 17, weight: .semibold))
-                            Text("版本 1.0.0 · 面试特训系统")
+                            Text("版本 1.1.0 · 面试特训系统")
                                 .font(.system(size: 14))
                                 .foregroundStyle(.secondary)
                         }

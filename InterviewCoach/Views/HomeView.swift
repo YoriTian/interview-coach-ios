@@ -41,10 +41,23 @@ struct HomeView: View {
 
                     // Resume or Upload
                     if let profile = viewModel.resumeProfile {
-                        ResumeSummaryView(profile: profile) {
-                            viewModel.startTechStackPractice()
-                            selectedTab = 2
-                        }
+                        ResumeSummaryView(
+                            profile: profile,
+                            generatedQuestionCount: viewModel.questionBank.aiGeneratedCount,
+                            isGeneratingQuestions: viewModel.isGeneratingTechQuestions,
+                            onReplaceResume: { isImporterPresented = true },
+                            onGenerateQuestions: {
+                                Task {
+                                    if await viewModel.generateTechStackQuestions() {
+                                        selectedTab = 2
+                                    }
+                                }
+                            },
+                            onStartTechStackPractice: {
+                                viewModel.startTechStackPractice()
+                                selectedTab = 2
+                            }
+                        )
                     } else {
                         uploadResumePanel
                     }
@@ -122,14 +135,8 @@ struct HomeView: View {
                         .frame(width: 42, height: 42)
                         .background(Color.blue.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("训练计划")
-                            .font(.system(size: 22, weight: .semibold))
-                        Text(planSummary)
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                    Text("训练计划")
+                        .font(.system(size: 22, weight: .semibold))
 
                     Spacer()
 
@@ -139,6 +146,11 @@ struct HomeView: View {
                         .padding(.vertical, 6)
                         .background(Color(.tertiarySystemFill), in: Capsule())
                 }
+
+                Text(planSummary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                     planMetric(title: "目标岗位", value: targetRoleName, icon: "person.crop.rectangle")

@@ -3,7 +3,7 @@ import SwiftUI
 struct DeepSeekSettingsPanel: View {
     @EnvironmentObject private var viewModel: AppViewModel
     @State private var apiKey = ""
-    @State private var selectedModel: DeepSeekModel = .flash
+    @State private var selectedModel: DeepSeekModel = .pro
     @State private var hasSavedKey = false
     @State private var isTesting = false
     @State private var statusMessage: String?
@@ -39,6 +39,10 @@ struct DeepSeekSettingsPanel: View {
                     UserDefaults.standard.set(model.rawValue, forKey: "deepseek.model")
                     viewModel.refreshAIService()
                 }
+
+                Label(selectedModel.detail, systemImage: selectedModel.usesDeepThinking ? "brain.head.profile" : "bolt")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
 
                 SecureField(hasSavedKey ? "已保存，可留空" : "粘贴 DeepSeek API Key", text: $apiKey)
                     .textInputAutocapitalization(.never)
@@ -144,7 +148,7 @@ struct DeepSeekSettingsPanel: View {
     }
 
     private func refreshSavedState() {
-        selectedModel = DeepSeekModel(rawValue: AIServiceFactory.currentModel()) ?? .flash
+        selectedModel = DeepSeekModel(rawValue: AIServiceFactory.currentModel()) ?? .pro
         hasSavedKey = SecureAPIKeyStore.hasDeepSeekKey()
     }
 }
